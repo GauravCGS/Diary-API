@@ -2,8 +2,9 @@ import mongoose from "mongoose";
 import Post from "../Models/Post.js";
 
 export const getAllPosts = async (req,res)=>{
+    const user_id = req.user._id;
     try {
-        const posts = await Post.find().sort({createdAt:-1});
+        const posts = await Post.find({user_id}).sort({createdAt:-1});
         if(!posts) res.status(404).json({error : "cannot find posts"});
         res.status(200).json(posts);
     } catch (error) {
@@ -30,7 +31,7 @@ export const deletePost = async (req,res)=>{
         const post = await Post.findById(id);
         if(!post) res.status(400).json({error:"Post doesn't exist"});
         const deletedPost =  await Post.findOneAndDelete({_id : id});
-        res.status(200).json({msg : "Post deleted"});
+        res.status(200).json(deletedPost);
     } catch (error) {
         res.status(404).json(error.message);
     }
@@ -38,8 +39,9 @@ export const deletePost = async (req,res)=>{
 
 export const createPost = async (req,res)=>{
     const {date,title,content} = req.body;
+    const user_id = req.user._id;
     try {
-        const post = await Post.create({date,title,content});
+        const post = await Post.create({date,title,content,user_id});
         res.status(200).json({post});
     } catch (error) {
         res.status(400).json({'error' : error.message});
@@ -54,7 +56,7 @@ export const updatePost = async (req,res)=>{
         const post = await Post.findById(id);
         if(!post) res.status(400).json({error:"Post doesn't exist"});
         const updatedPost = await Post.findOneAndUpdate({_id : id},{date,title,content});
-        res.status(200).json({msg : "Post updated"});
+        res.status(200).json(updatedPost);
     } catch (error) {
         res.status(404).json(error.message);
     }
